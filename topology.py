@@ -20,17 +20,23 @@ def load_spec(path):
         return json.load(f)
 
 
-def build_graph(spec, body_radius=0.3):
+def build_graph(spec, body_radius=0.3, margin=0.0):
     """把规格转成无向图:节点 = 房间(带矩形范围),边 = 门(带位置和宽度)。
 
-    body_radius: 通行者半径(米)。门洞宽度小于 2*body_radius 视为挤不过去,不建边。
+    body_radius: 通行者半径(米)。
+    margin: 安全裕量(米),默认 0。建边规则:width >= 2*body_radius + margin。
+
+    压线档警告:width 恰好等于 2*body_radius 时,真值检验(truth_check.py,
+    MiniWorld 实测 60 次)发现结局由 ~1e-16 的浮点舍入决定——门洞端点坐标
+    的 portal 算术路径不同,名义相同的缺口有的能过有的被拦。该点应视为
+    未定区;需要保守结论时给正的 margin(如 0.01),把压线档显式判为不过。
     """
     G = nx.Graph()
     for room in spec["rooms"]:
         G.add_node(room["id"], min_x=room["min_x"], max_x=room["max_x"],
                    min_z=room["min_z"], max_z=room["max_z"])
     for door in spec["doors"]:
-        if door["width"] < 2 * body_radius:
+        if door["width"] < 2 * body_radius + margin:
             continue
         G.add_edge(door["a"], door["b"], pos=door["pos"], width=door["width"])
     return G
