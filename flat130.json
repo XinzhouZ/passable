@@ -14,8 +14,8 @@
     {"id": "balcony_service", "min_x": 2.9,  "max_x": 5.4,  "min_z": 11.6, "max_z": 13.6}
   ],
   "doors": [
-    {"a": "corridor", "b": "living",          "pos": 2.4,   "width": 1.8},
-    {"a": "corridor", "b": "dining",          "pos": 4.0,   "width": 1.5},
+    {"a": "corridor", "b": "living",          "pos": 2.45,  "width": 4.9},
+    {"a": "corridor", "b": "dining",          "pos": 4.0,   "width": 3.2},
     {"a": "corridor", "b": "bedroom_n",       "pos": 7.1,   "width": 0.9},
     {"a": "corridor", "b": "study",           "pos": 9.8,   "width": 0.9},
     {"a": "corridor", "b": "bath_common",     "pos": 12.25, "width": 0.8},

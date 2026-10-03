@@ -1,7 +1,11 @@
-"""建筑平面拓扑:读 JSON 规格建 NetworkX 无向图,按身体半径扫描门的可通行性。"""
+"""建筑平面拓扑:读 JSON 规格建 NetworkX 无向图,按身体半径扫描门的可通行性。
+
+用法:python topology.py [spec.json](默认 demo.json)
+"""
 
 import itertools
 import json
+import sys
 
 import networkx as nx
 
@@ -104,7 +108,8 @@ def print_edge_impacts(spec, body_radius=0.3):
 
 
 def main():
-    spec = load_spec("demo.json")
+    path = sys.argv[1] if len(sys.argv) > 1 else "demo.json"
+    spec = load_spec(path)
     print_door_thresholds(spec)
     print()
     sweep_body_radius(spec)
