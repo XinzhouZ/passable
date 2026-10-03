@@ -1,0 +1,65 @@
+"""建筑平面拓扑:读 JSON 规格建 NetworkX 无向图,按身体半径扫描门的可通行性。"""
+
+import json
+
+import networkx as nx
+
+
+def load_spec(path):
+    """读取 JSON 规格文件,返回 dict。"""
+    with open(path, encoding="utf-8") as f:
+        return json.load(f)
+
+
+def build_graph(spec, body_radius=0.3):
+    """把规格转成无向图:节点 = 房间(带矩形范围),边 = 门(带位置和宽度)。
+
+    body_radius: 通行者半径(米)。门洞宽度小于 2*body_radius 视为挤不过去,不建边。
+    """
+    G = nx.Graph()
+    for room in spec["rooms"]:
+        G.add_node(room["id"], min_x=room["min_x"], max_x=room["max_x"],
+                   min_z=room["min_z"], max_z=room["max_z"])
+    for door in spec["doors"]:
+        if door["width"] < 2 * body_radius:
+            continue
+        G.add_edge(door["a"], door["b"], z=door["z"], width=door["width"])
+    return G
+
+
+def print_door_thresholds(spec):
+    """打印每扇门:连接的房间、宽度、失效半径。
+
+    失效半径 = width/2:body_radius 恰好等于它时仍可通行(规则是严格小于),
+    一旦超过,这扇门在图中就不存在了。
+    """
+    doors = sorted(spec["doors"], key=lambda d: d["width"] / 2)  # 稳定排序,同宽保持 JSON 顺序
+    print(f"{'门':<24} {'宽度':>4}  失效半径")
+    for d in doors:
+        pair = f"{d['a']} <-> {d['b']}"
+        print(f"{pair:<24} {d['width']:>4.2f}  {d['width'] / 2:>6.2f}")
+
+
+def sweep_body_radius(spec, r_min=0.2, r_max=0.8, step=0.05):
+    """扫描 body_radius,每档打印:剩余边数、连通分支数、入口不可达的房间。"""
+    n_steps = round((r_max - r_min) / step) + 1
+    print(f"{'r':>5}  {'边数':>4}  {'分支':>4}  不可达房间(入口: {spec['start']})")
+    for i in range(n_steps):
+        r = round(r_min + i * step, 2)  # 取两位小数,避免浮点累加污染边界判断
+        G = build_graph(spec, body_radius=r)
+        reachable = nx.shortest_path_length(G, source=spec["start"])
+        unreachable = [n for n in G.nodes if n not in reachable]
+        unreachable_str = ", ".join(unreachable) if unreachable else "-"
+        print(f"{r:>5.2f}  {G.number_of_edges():>4}  "
+              f"{nx.number_connected_components(G):>4}  {unreachable_str}")
+
+
+def main():
+    spec = load_spec("demo.json")
+    print_door_thresholds(spec)
+    print()
+    sweep_body_radius(spec)
+
+
+if __name__ == "__main__":
+    main()
