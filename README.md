@@ -3,14 +3,14 @@
 **Same building, different graphs.**
 A small tool that treats body size as a continuous parameter and sweeps it: for a floor plan described in JSON, it builds a room-adjacency graph in which a door narrower than twice the passer-by's body radius is not an edge at all — and plots how that graph degrades as the radius grows. It is built for the downstream audit of procedurally generated indoor environments: many candidate plans, each summarized by one cheap degradation curve.
 
-![Degradation curve](breakdown_flat130.png)
+![Degradation curve](outputs/breakdown_flat130.png)
 
 *Sweep over `flat130.json`: edges (blue, left axis) fall while connected components (orange, right axis) climb. Dashed lines mark door-width thresholds; the green band marks the interval where a bedroom stays reachable through a redundant detour.*
 
 ## The two spec files
 
-- [`demo.json`](demo.json) — a **constructed teaching example**, not a real plan. A compact two-bedroom flat whose balcony ring deliberately has equal bottlenecks, used to exhibit pseudo-redundancy.
-- [`flat130.json`](flat130.json) — modeled on a **real apartment** (~130 m², three bedrooms, two bathrooms, an east–west corridor spine, service and viewing balconies). Its balcony detour has distinct bottlenecks and is genuinely redundant.
+- [`specs/demo.json`](specs/demo.json) — a **constructed teaching example**, not a real plan. A compact two-bedroom flat whose balcony ring deliberately has equal bottlenecks, used to exhibit pseudo-redundancy.
+- [`specs/flat130.json`](specs/flat130.json) — modeled on a **real apartment** (~130 m², three bedrooms, two bathrooms, an east–west corridor spine, service and viewing balconies). Its balcony detour has distinct bottlenecks and is genuinely redundant.
 
 ## Equal-bottleneck vs distinct-bottleneck rings
 
@@ -35,20 +35,20 @@ cd spatial-topology
 py -m venv venv && venv/Scripts/python -m pip install networkx matplotlib
 ```
 
-Run (any spec file; `demo.json` by default):
+Run from the repo root (any spec file; `specs/demo.json` by default):
 
 ```bash
-venv/Scripts/python topology.py flat130.json     # door table, radius sweep, edge impacts (terminal + CSV)
-venv/Scripts/python plot_plan.py flat130.json    # floor-plan drawing → plan.png
-venv/Scripts/python plot_sweep.py flat130.json   # degradation curve → breakdown_<spec>.png
-venv/Scripts/python truth_check.py flat130.json  # physical door-crossing trials vs graph predictions
+venv/Scripts/python src/topology.py specs/flat130.json     # door table, radius sweep, edge impacts (terminal + CSV)
+venv/Scripts/python src/plot_plan.py specs/flat130.json    # floor-plan drawing → outputs/plan.png
+venv/Scripts/python src/plot_sweep.py specs/flat130.json   # degradation curve → outputs/breakdown_<spec>.png
+venv/Scripts/python src/truth_check.py specs/flat130.json  # physical door-crossing trials vs graph predictions
 ```
 
-`topology.py` writes `doors_<spec>.csv`, `sweep_<spec>.csv`, `impacts_<spec>.csv` alongside the terminal output.
+`topology.py` writes `outputs/doors_<spec>.csv`, `outputs/sweep_<spec>.csv`, `outputs/impacts_<spec>.csv` alongside the terminal output.
 
 ## JSON format
 
-See [`demo.json`](demo.json) for a minimal example and [`flat130.json`](flat130.json) for a full real-plan-based one.
+See [`specs/demo.json`](specs/demo.json) for a minimal example and [`specs/flat130.json`](specs/flat130.json) for a full real-plan-based one.
 
 | field | meaning |
 |---|---|
@@ -91,8 +91,8 @@ One JSON is the single source of truth. The target workflow is auditing procedur
 
 ### 两个规格文件
 
-- [`demo.json`](demo.json) —— **构造出来的教学例子**,不是真实户型:一个紧凑两居,阳台环刻意做成等瓶颈,用来展示伪冗余。
-- [`flat130.json`](flat130.json) —— **基于真实户型**建模(约 130㎡,三室两卫,东西向走廊,生活/观景双阳台)。它的阳台绕行瓶颈互异,是真冗余。
+- [`specs/demo.json`](specs/demo.json) —— **构造出来的教学例子**,不是真实户型:一个紧凑两居,阳台环刻意做成等瓶颈,用来展示伪冗余。
+- [`specs/flat130.json`](specs/flat130.json) —— **基于真实户型**建模(约 130㎡,三室两卫,东西向走廊,生活/观景双阳台)。它的阳台绕行瓶颈互异,是真冗余。
 
 ### 等瓶颈环与异瓶颈环
 
@@ -115,18 +115,20 @@ cd spatial-topology
 py -m venv venv && venv/Scripts/python -m pip install networkx matplotlib
 ```
 
+在仓库根目录运行(规格可换,默认 `specs/demo.json`):
+
 ```bash
-venv/Scripts/python topology.py flat130.json     # 门清单、扫描、扰动(终端 + CSV)
-venv/Scripts/python plot_plan.py flat130.json    # 平面图 → plan.png
-venv/Scripts/python plot_sweep.py flat130.json   # 退化曲线 → breakdown_<规格名>.png
-venv/Scripts/python truth_check.py flat130.json  # 穿门物理实测 vs 图预测
+venv/Scripts/python src/topology.py specs/flat130.json     # 门清单、扫描、扰动(终端 + CSV)
+venv/Scripts/python src/plot_plan.py specs/flat130.json    # 平面图 → outputs/plan.png
+venv/Scripts/python src/plot_sweep.py specs/flat130.json   # 退化曲线 → outputs/breakdown_<规格名>.png
+venv/Scripts/python src/truth_check.py specs/flat130.json  # 穿门物理实测 vs 图预测
 ```
 
-`topology.py` 除终端输出外,会写出 `doors_<规格名>.csv`、`sweep_<规格名>.csv`、`impacts_<规格名>.csv`。
+`topology.py` 除终端输出外,会在 `outputs/` 写出 `doors_<规格名>.csv`、`sweep_<规格名>.csv`、`impacts_<规格名>.csv`。
 
 ### JSON 格式
 
-最小示例见 [`demo.json`](demo.json),完整真实户型见 [`flat130.json`](flat130.json)。字段含义:
+最小示例见 [`specs/demo.json`](specs/demo.json),完整真实户型见 [`specs/flat130.json`](specs/flat130.json)。字段含义:
 
 | 字段 | 含义 |
 |---|---|

@@ -5,7 +5,7 @@
   连续 move_forward → 用 Room.point_inside 判断是否到达对面房间。
 图预测规则与 topology.build_graph 一致:width >= 2*radius 即可过。
 
-用法:python truth_check.py [spec.json](默认 flat130.json)
+用法(仓库根目录):python src/truth_check.py [specs/xxx.json](默认 specs/flat130.json)
 """
 
 import sys
@@ -74,7 +74,7 @@ def try_cross(env, rooms, start, direction, target_id):
 
 
 def main():
-    path = sys.argv[1] if len(sys.argv) > 1 else "flat130.json"
+    path = sys.argv[1] if len(sys.argv) > 1 else "specs/flat130.json"
     spec = load_spec(path)
     rects = {r["id"]: r for r in spec["rooms"]}
 

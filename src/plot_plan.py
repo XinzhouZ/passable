@@ -1,12 +1,14 @@
 """从 JSON 规格直接绘制建筑平面图:粗线墙、门洞缺口、房间名与面积、门宽标注。
 
 独立于 MiniWorld——这是规格的"图纸上"的样子,用于和 world_top.png 肉眼比对。
-用法:python plot_plan.py [spec.json](默认 demo.json)
+用法(仓库根目录):python src/plot_plan.py [specs/xxx.json](默认 specs/demo.json)
+图存到 outputs/plan.png。
 可选的 "entrance" 字段描述入口门(入口不是房间,不进 doors):
   {"room": 房间id, "orient": "x"|"z", "coord": 墙坐标, "pos": 沿墙位置, "width": 宽}
 """
 
 import sys
+from pathlib import Path
 
 import matplotlib.pyplot as plt
 
@@ -147,7 +149,7 @@ def draw_plan(spec, ax):
 
 
 def main():
-    path = sys.argv[1] if len(sys.argv) > 1 else "demo.json"
+    path = sys.argv[1] if len(sys.argv) > 1 else "specs/demo.json"
     spec = load_spec(path)
     fig, ax = plt.subplots(figsize=(9, 8.5), dpi=150)
     fig.patch.set_facecolor("#fcfcfb")
@@ -156,8 +158,10 @@ def main():
     ax.set_title(f"建筑平面图({path})", fontsize=13, color=INK, pad=12)
     ax.autoscale()
     ax.margins(0.08)
-    fig.savefig("plan.png", bbox_inches="tight", facecolor=fig.get_facecolor())
-    print(f"已保存 plan.png({path}),{len(spec['rooms'])} 个房间,"
+    Path("outputs").mkdir(exist_ok=True)
+    fig.savefig("outputs/plan.png", bbox_inches="tight",
+                facecolor=fig.get_facecolor())
+    print(f"已保存 outputs/plan.png({path}),{len(spec['rooms'])} 个房间,"
           f"{len(spec['doors'])} 扇门"
           + (",含入口" if spec.get("entrance") else ""))
 

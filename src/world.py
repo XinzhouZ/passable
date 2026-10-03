@@ -1,4 +1,9 @@
-"""把 JSON 规格建成 MiniWorld 三维世界,渲染俯视图做肉眼比对。"""
+"""把 JSON 规格建成 MiniWorld 三维世界,渲染俯视图做肉眼比对。
+
+用法(仓库根目录):python src/world.py,俯视图存 outputs/world_top.png。
+"""
+
+from pathlib import Path
 
 import matplotlib.pyplot as plt
 from miniworld.miniworld import MiniWorldEnv
@@ -95,17 +100,18 @@ class CountingSpecWorld(SpecWorld):
 
 
 def main():
-    spec = load_spec("demo.json")
+    spec = load_spec("specs/demo.json")
     # obs_width/height 决定俯视图像素(render_top_view 默认用 obs_fb);
     # 不设 render_mode、不调 render(),只用离屏渲染,不会弹窗
     env = CountingSpecWorld(spec, obs_width=1000, obs_height=900)
     env.reset()
     img = env.render_top_view()
-    plt.imsave("world_top.png", img)
+    Path("outputs").mkdir(exist_ok=True)
+    plt.imsave("outputs/world_top.png", img)
     env.close()
 
     portal_total = sum(len(p) for room in env.rooms for p in room.portals)
-    print(f"已保存 world_top.png({img.shape[1]}x{img.shape[0]})")
+    print(f"已保存 outputs/world_top.png({img.shape[1]}x{img.shape[0]})")
     print(f"JSON 门数:      {len(spec['doors'])}")
     print(f"connect_rooms:  成功调用 {env.connect_calls} 次"
           f"(失败会触发 assert 直接崩,不存在静默失败)")

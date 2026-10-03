@@ -1,6 +1,6 @@
-"""把 body_radius 扫描结果画成退化曲线,存 breakdown_<规格名>.png。
+"""把 body_radius 扫描结果画成退化曲线,存 outputs/breakdown_<规格名>.png。
 
-用法:python plot_sweep.py [spec.json](默认 demo.json)
+用法(仓库根目录):python src/plot_sweep.py [specs/xxx.json](默认 specs/demo.json)
 """
 
 import sys
@@ -63,9 +63,10 @@ def door_thresholds(spec):
 
 
 def main():
-    path = sys.argv[1] if len(sys.argv) > 1 else "demo.json"
+    path = sys.argv[1] if len(sys.argv) > 1 else "specs/demo.json"
     spec = load_spec(path)
     radii, edges, comps = sweep_data(spec)
+    Path("outputs").mkdir(exist_ok=True)
 
     fig, ax = plt.subplots(figsize=(9, 5.5), dpi=150)
     fig.patch.set_facecolor(SURFACE)
@@ -118,7 +119,7 @@ def main():
     ax.set_title(f"body_radius 扫描:门宽约束下的图退化({path})",
                  fontsize=13, color=INK, pad=30)
 
-    out = f"breakdown_{Path(path).stem}.png"
+    out = f"outputs/breakdown_{Path(path).stem}.png"
     fig.savefig(out, bbox_inches="tight", facecolor=fig.get_facecolor())
     print(f"已保存 {out}({path}),r {radii[0]}~{radii[-1]},"
           f"边数峰值 {max(edges)},分支峰值 {max(comps)}")

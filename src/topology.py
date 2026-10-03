@@ -1,8 +1,8 @@
 """建筑平面拓扑:读 JSON 规格建 NetworkX 无向图,按身体半径扫描门的可通行性。
 
-用法:python topology.py [spec.json](默认 demo.json)
-终端照常打印三张表,同时各存一份 CSV:doors_<规格名>.csv、sweep_<规格名>.csv、
-impacts_<规格名>.csv(utf-8-sig 编码,Excel 直接打开不乱码)。
+用法(仓库根目录):python src/topology.py [specs/xxx.json](默认 specs/demo.json)
+终端照常打印三张表,同时各存一份 CSV 到 outputs/:doors_<规格名>.csv、
+sweep_<规格名>.csv、impacts_<规格名>.csv(utf-8-sig 编码,Excel 直接打开不乱码)。
 """
 
 import csv
@@ -140,26 +140,27 @@ def print_edge_impacts(base, rows, body_radius=0.3):
 # ---------------------------------------------------------------- 主流程
 
 def main():
-    path = sys.argv[1] if len(sys.argv) > 1 else "demo.json"
+    path = sys.argv[1] if len(sys.argv) > 1 else "specs/demo.json"
     stem = Path(path).stem
     spec = load_spec(path)
+    Path("outputs").mkdir(exist_ok=True)
 
     doors = door_rows(spec)
     print_door_thresholds(doors)
-    write_csv(f"doors_{stem}.csv",
+    write_csv(f"outputs/doors_{stem}.csv",
               ["a", "b", "width_m", "fail_radius_m"], doors)
     print()
 
     sweep = sweep_rows(spec)
     print_sweep(sweep, spec["start"])
-    write_csv(f"sweep_{stem}.csv",
+    write_csv(f"outputs/sweep_{stem}.csv",
               ["body_radius_m", "edges", "components", "unreachable"],
               [(r, e, c, ";".join(u)) for r, e, c, u in sweep])
     print()
 
     base, impacts = edge_impacts(spec)
     print_edge_impacts(base, impacts)
-    write_csv(f"impacts_{stem}.csv",
+    write_csv(f"outputs/impacts_{stem}.csv",
               ["a", "b", "delta_sum", "delta_avg_depth", "delta_components",
                "base_sum", "base_avg_depth", "base_components"],
               [(a, b, d_sum, d_depth, d_comp, base[0], base[1], base[2])
