@@ -1,7 +1,7 @@
 # spatial-topology
 
 **Same building, different graphs.**
-A small tool that treats body size as a continuous parameter and sweeps it: for a floor plan described in JSON, it builds a room-adjacency graph in which a door narrower than twice the passer-by's body radius is not an edge at all — and plots how that graph degrades as the radius grows.
+A small tool that treats body size as a continuous parameter and sweeps it: for a floor plan described in JSON, it builds a room-adjacency graph in which a door narrower than twice the passer-by's body radius is not an edge at all — and plots how that graph degrades as the radius grows. It is built for the downstream audit of procedurally generated indoor environments: many candidate plans, each summarized by one cheap degradation curve.
 
 ![Degradation curve](breakdown_flat130.png)
 
@@ -21,6 +21,8 @@ A graph cycle means redundancy only while every path along it stays passable, an
 
 The discriminant is simply whether the detour's bottleneck is strictly wider than the direct path's. On the sweep curves it is visible as: **edges fall while connected components hold** (true redundancy) versus **edges fall and components jump** (pseudo-redundancy, the house shatters).
 
+One boundary caveat: when `width == 2·body_radius` exactly, the pass/fail outcome is a knife edge. `truth_check.py` ran 60 physical door-crossing trials in MiniWorld: 57 agreed with the graph, and the 3 disagreements all sit exactly on the boundary, where ±1-ulp rounding in the collision geometry decides the result. `build_graph` therefore accepts an optional `margin` (rule: `width ≥ 2·body_radius + margin`) so a conservative analysis can push exact-boundary cases into the fail region.
+
 ## Usage
 
 Python 3.11. On Windows the system interpreter is `py` (inside the venv, `python` works).
@@ -39,6 +41,7 @@ Run (any spec file; `demo.json` by default):
 venv/Scripts/python topology.py flat130.json     # door table, radius sweep, edge impacts (terminal + CSV)
 venv/Scripts/python plot_plan.py flat130.json    # floor-plan drawing → plan.png
 venv/Scripts/python plot_sweep.py flat130.json   # degradation curve → breakdown_<spec>.png
+venv/Scripts/python truth_check.py flat130.json  # physical door-crossing trials vs graph predictions
 ```
 
 `topology.py` writes `doors_<spec>.csv`, `sweep_<spec>.csv`, `impacts_<spec>.csv` alongside the terminal output.
@@ -61,17 +64,17 @@ See [`demo.json`](demo.json) for a minimal example and [`flat130.json`](flat130.
 
 Making door widths and body sizes first-class in route analysis is an established concern in architecture and BIM, not an open blank this repo fills:
 
-- **Accessible route analysis** in architecture/BIM has used route graphs carrying clear opening widths and maneuvering clearances since at least the early 2000s.
+- **Accessible route analysis** in architecture/BIM: accessible route graphs go back to at least 2002, with opening nodes carrying three clear-width components (door width plus approach clearances on both sides).
 - **Emergency egress and evacuation accessibility models** incorporate door widths, corridor widths, and turning spaces.
 - **Automated ADA compliance checking** quantifies door clear widths and maneuvering clearances directly from BIM.
 
-Space syntax indeed does not record door widths — but door-width-aware analysis has its own established toolchain, and nobody who needs widths is waiting for space syntax to grow them. This repo is a lightweight, room-adjacency-graph implementation: its point is sweeping body size as a continuous parameter and rendering one readable degradation curve per plan, not replacing the tools above.
+Space syntax indeed does not record door widths, and researchers who need them already work with the toolchains above. This repo is a lightweight, room-adjacency-graph implementation — meant for auditing procedurally generated indoor environments, where many candidate plans each need a cheap degradation curve — not a replacement for those tools.
 
 ## Why
 
 Textbook graph abstractions of buildings treat doors as binary and bodies as points. Doors have widths and bodies have radii, and the topology of a building is a function of both: same plan, different body, different graph — an accessibility statement (wheelchair, adult, robot), an evacuation statement, and a modeling statement in one picture.
 
-One JSON is the single source of truth. Roadmap: the same spec will also build a MiniWorld 3D world, so the graph you compute and the space an agent actually walks can be checked against each other.
+One JSON is the single source of truth. The target workflow is auditing procedurally generated indoor environments: every generated plan gets one cheap degradation curve before costlier checks. Roadmap: the same spec will also build a MiniWorld 3D world, so the graph you compute and the space an agent actually walks can be checked against each other.
 
 ## License
 
@@ -82,7 +85,7 @@ One JSON is the single source of truth. Roadmap: the same spec will also build a
 ## 中文说明
 
 **同一栋楼,对不同尺寸的通行者是不同的图。**
-一个把身体尺寸作为连续参数来扫描的小工具:用 JSON 描述房间和门,建成房间邻接图——门洞宽度小于两倍身体半径的门,在图上不算一条边——然后画出图随半径增大的退化曲线。
+一个把身体尺寸作为连续参数来扫描的小工具:用 JSON 描述房间和门,建成房间邻接图——门洞宽度小于两倍身体半径的门,在图上不算一条边——然后画出图随半径增大的退化曲线。定位于后续审计程序化生成的室内环境:候选方案成批出现,每份户型用一条低成本的退化曲线概括。
 
 (退化曲线见上方图片:蓝线是边数,橙线是连通分支数,竖虚线是各门宽的失效阈值,绿色阴影带是次卧南靠冗余绕行保持可达的区间。)
 
@@ -100,6 +103,8 @@ One JSON is the single source of truth. Roadmap: the same spec will also build a
 
 判别标准就一条:**绕路瓶颈是否严格宽于直路**。在退化曲线上直接可见——真冗余是"边数下降而分支数不动",伪冗余是"边数下降、分支数跳升"(房子碎了)。
 
+一个压线警告:`width == 2·body_radius` 恰好相等时,能否通过处在刀刃上。`truth_check.py` 在 MiniWorld 里做了 60 次穿门实测:57 次与图一致,3 次不一致全部正好落在压线档,由碰撞几何里 ±1 ulp 的浮点舍入决定。因此 `build_graph` 提供可选的 `margin` 参数(规则:`width ≥ 2·body_radius + margin`),保守分析可以把压线档显式推入"不过"区。
+
 ### 用法
 
 Python 3.11。Windows 下系统解释器是 `py`(venv 激活后 `python` 可用)。
@@ -114,6 +119,7 @@ py -m venv venv && venv/Scripts/python -m pip install networkx matplotlib
 venv/Scripts/python topology.py flat130.json     # 门清单、扫描、扰动(终端 + CSV)
 venv/Scripts/python plot_plan.py flat130.json    # 平面图 → plan.png
 venv/Scripts/python plot_sweep.py flat130.json   # 退化曲线 → breakdown_<规格名>.png
+venv/Scripts/python truth_check.py flat130.json  # 穿门物理实测 vs 图预测
 ```
 
 `topology.py` 除终端输出外,会写出 `doors_<规格名>.csv`、`sweep_<规格名>.csv`、`impacts_<规格名>.csv`。
@@ -136,17 +142,17 @@ venv/Scripts/python plot_sweep.py flat130.json   # 退化曲线 → breakdown_<�
 
 把门宽和身体尺寸纳入路径分析,在建筑与 BIM 领域是成熟议题,不是本仓库填补的空白:
 
-- **可达路径分析**:建筑/BIM 领域至少从 2000 年代初就有携带开口净宽与两侧回转净空的路径图方法;
+- **可达路径分析**:建筑/BIM 领域至少从 2002 年起就有 accessible route graph,开口节点带三个净宽分量(门净宽与两侧通行净空);
 - **应急疏散与避难可达性模型**:纳入门洞宽度、走廊宽度与回转空间;
 - **自动化 ADA 合规检查**:直接从 BIM 量化门净宽与操作净空。
 
-空间句法确实不记录门宽——但需要门宽的分析自有一套成熟工具链,并不在等空间句法长出这个能力。本仓库是一个轻量的、以房间邻接图为单位的实现:它的价值在于把身体尺寸作为连续参数扫描、给每份户型画出一条可读的退化曲线,而不是替代上述工具。
+空间句法确实不记录门宽,需要门宽的研究者本来就在用上述工具链。本仓库是一个轻量的、以房间邻接图为单位的实现——定位于审计程序化生成的室内环境:成批的候选方案,每份都需要一条低成本的退化曲线——而不是替代上述工具。
 
 ### 为什么做这个
 
 教科书的图抽象把门当二值、把身体当点。门有宽度,身体有半径,而一栋楼的拓扑是两者的函数——同一张平面,不同的身体,不同的图。这一张图同时是可达性陈述(轮椅、成人、机器人)、疏散陈述和建模陈述。
 
-整个项目只用一份 JSON 作为唯一数据源。后续计划:同一份规格还将生成 MiniWorld 三维世界,让算出来的图和智能体真正走的空间互相印证。
+整个项目只用一份 JSON 作为唯一数据源。目标工作流是审计程序化生成的室内环境:每个生成的户型先拿到一条低成本的退化曲线,再进入更贵的检查。后续计划:同一份规格还将生成 MiniWorld 三维世界,让算出来的图和智能体真正走的空间互相印证。
 
 ### 许可证
 
