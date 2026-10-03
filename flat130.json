@@ -1,0 +1,32 @@
+{
+  "rooms": [
+    {"id": "living",          "min_x": 0.0,  "max_x": 4.9,  "min_z": 2.4,  "max_z": 6.4},
+    {"id": "bedroom_s",       "min_x": 4.9,  "max_x": 8.15, "min_z": 2.4,  "max_z": 6.4},
+    {"id": "bath_master",     "min_x": 8.15, "max_x": 9.75, "min_z": 2.4,  "max_z": 6.4},
+    {"id": "master",          "min_x": 9.75, "max_x": 13.5, "min_z": 2.4,  "max_z": 6.4},
+    {"id": "balcony_view",    "min_x": 2.5,  "max_x": 7.5,  "min_z": 0.4,  "max_z": 2.4},
+    {"id": "corridor",        "min_x": 0.0,  "max_x": 13.5, "min_z": 6.4,  "max_z": 7.6},
+    {"id": "kitchen",         "min_x": 0.0,  "max_x": 2.4,  "min_z": 7.6,  "max_z": 11.6},
+    {"id": "dining",          "min_x": 2.4,  "max_x": 5.6,  "min_z": 7.6,  "max_z": 11.6},
+    {"id": "bedroom_n",       "min_x": 5.6,  "max_x": 8.6,  "min_z": 7.6,  "max_z": 11.6},
+    {"id": "study",           "min_x": 8.6,  "max_x": 11.0, "min_z": 7.6,  "max_z": 11.6},
+    {"id": "bath_common",     "min_x": 11.0, "max_x": 13.5, "min_z": 7.6,  "max_z": 9.2},
+    {"id": "balcony_service", "min_x": 2.9,  "max_x": 5.4,  "min_z": 11.6, "max_z": 13.6}
+  ],
+  "doors": [
+    {"a": "corridor", "b": "living",          "pos": 2.4,   "width": 1.8},
+    {"a": "corridor", "b": "dining",          "pos": 4.0,   "width": 1.5},
+    {"a": "corridor", "b": "bedroom_n",       "pos": 7.1,   "width": 0.9},
+    {"a": "corridor", "b": "study",           "pos": 9.8,   "width": 0.9},
+    {"a": "corridor", "b": "bath_common",     "pos": 12.25, "width": 0.8},
+    {"a": "corridor", "b": "bedroom_s",       "pos": 6.5,   "width": 0.9},
+    {"a": "corridor", "b": "master",          "pos": 10.4,  "width": 0.9},
+    {"a": "dining",   "b": "kitchen",         "pos": 9.6,   "width": 1.5},
+    {"a": "dining",   "b": "balcony_service", "pos": 4.15,  "width": 1.4},
+    {"a": "master",   "b": "bath_master",     "pos": 4.4,   "width": 0.7},
+    {"a": "living",   "b": "balcony_view",    "pos": 3.7,   "width": 1.8},
+    {"a": "bedroom_s", "b": "balcony_view",   "pos": 6.2,   "width": 1.2}
+  ],
+  "entrance": {"room": "corridor", "orient": "x", "coord": 0.0, "pos": 7.0, "width": 1.0},
+  "start": "corridor"
+}

@@ -1,5 +1,6 @@
 """建筑平面拓扑:读 JSON 规格建 NetworkX 无向图,按身体半径扫描门的可通行性。"""
 
+import itertools
 import json
 
 import networkx as nx
@@ -23,7 +24,7 @@ def build_graph(spec, body_radius=0.3):
     for door in spec["doors"]:
         if door["width"] < 2 * body_radius:
             continue
-        G.add_edge(door["a"], door["b"], z=door["z"], width=door["width"])
+        G.add_edge(door["a"], door["b"], pos=door["pos"], width=door["width"])
     return G
 
 
@@ -54,11 +55,61 @@ def sweep_body_radius(spec, r_min=0.2, r_max=0.8, step=0.05):
               f"{nx.number_connected_components(G):>4}  {unreachable_str}")
 
 
+def edge_impacts(spec, body_radius=0.3):
+    """对图里每条边,计算拆掉它之后的影响,按影响从大到小排序。
+
+    约定:房间对不可达时,距离按 n(节点数)记惩罚——否则拆掉桥边后
+    可达对变少,"两两最短路总和"反而缩小,排序会撒谎。平均深度同理。
+    返回 (基准指标, [(边, Δ最短路总和, Δ平均深度, Δ连通分支), ...])。
+    """
+    G = build_graph(spec, body_radius=body_radius)
+    n = G.number_of_nodes()
+    start = spec["start"]
+
+    def metrics(g):
+        total = 0
+        for u, v in itertools.combinations(g.nodes, 2):
+            try:
+                total += nx.shortest_path_length(g, u, v)
+            except nx.NetworkXNoPath:
+                total += n
+        depth_sum = 0
+        for room in g.nodes:
+            try:
+                depth_sum += nx.shortest_path_length(g, start, room)
+            except nx.NetworkXNoPath:
+                depth_sum += n
+        return total, depth_sum / n, nx.number_connected_components(g)
+
+    base = metrics(G)
+    rows = []
+    for e in G.edges:
+        g2 = G.copy()
+        g2.remove_edge(*e)
+        total, avg_depth, comps = metrics(g2)
+        rows.append((e, total - base[0], avg_depth - base[1], comps - base[2]))
+    rows.sort(key=lambda r: (r[1], r[2], r[3]), reverse=True)
+    return base, rows
+
+
+def print_edge_impacts(spec, body_radius=0.3):
+    """打印拆边影响报告。"""
+    base, rows = edge_impacts(spec, body_radius)
+    print(f"基准(body_radius={body_radius}):边数 {len(rows)} | "
+          f"两两最短路总和 {base[0]} | 平均深度 {base[1]:.3f} | 连通分支 {base[2]}")
+    print(f"{'拆除的门':<24} {'Δ最短路总和':>9}  {'Δ平均深度':>9}  {'Δ连通分支':>6}")
+    for (u, v), d_sum, d_depth, d_comp in rows:
+        comp_str = f"{d_comp:+d}" if d_comp else "0"
+        print(f"{u + ' <-> ' + v:<24} {d_sum:>+9}  {d_depth:>+9.3f}  {comp_str:>6}")
+
+
 def main():
     spec = load_spec("demo.json")
     print_door_thresholds(spec)
     print()
     sweep_body_radius(spec)
+    print()
+    print_edge_impacts(spec)
 
 
 if __name__ == "__main__":
