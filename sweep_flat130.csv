@@ -1,0 +1,14 @@
+﻿body_radius_m,edges,components,unreachable
+0.2,12,1,
+0.25,12,1,
+0.3,12,1,
+0.35,12,1,
+0.4,11,2,bath_master
+0.45,10,3,bath_master;bath_common
+0.5,6,6,bath_master;master;bedroom_n;study;bath_common
+0.55,6,6,bath_master;master;bedroom_n;study;bath_common
+0.6,6,6,bath_master;master;bedroom_n;study;bath_common
+0.65,5,7,bedroom_s;bath_master;master;bedroom_n;study;bath_common
+0.7,5,7,bedroom_s;bath_master;master;bedroom_n;study;bath_common
+0.75,4,8,bedroom_s;bath_master;master;bedroom_n;study;bath_common;balcony_service
+0.8,3,9,bedroom_s;bath_master;master;kitchen;bedroom_n;study;bath_common;balcony_service

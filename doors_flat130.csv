@@ -1,0 +1,13 @@
+﻿a,b,width_m,fail_radius_m
+master,bath_master,0.7,0.35
+corridor,bath_common,0.8,0.4
+corridor,bedroom_n,0.9,0.45
+corridor,study,0.9,0.45
+corridor,bedroom_s,0.9,0.45
+corridor,master,0.9,0.45
+bedroom_s,balcony_view,1.2,0.6
+dining,balcony_service,1.4,0.7
+dining,kitchen,1.5,0.75
+living,balcony_view,1.8,0.9
+corridor,dining,3.2,1.6
+corridor,living,4.9,2.45
